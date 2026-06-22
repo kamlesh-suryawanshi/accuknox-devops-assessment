@@ -1,4 +1,4 @@
-name: Build Wisecow Docker Image
+name: Build and Push Wisecow Image
 
 on:
   push:
@@ -6,12 +6,28 @@ on:
       - main
 
 jobs:
-  docker-build:
+  docker:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build Docker Image
-        run: docker build -t wisecow .
+        run: |
+          docker build -t ghcr.io/kamlesh-suryawanshi/wisecow:latest .
+
+      - name: Push Docker Image
+        run: |
+          docker push ghcr.io/kamlesh-suryawanshi/wisecow:latest
